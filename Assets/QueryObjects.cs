@@ -23,7 +23,8 @@ public abstract class Q_OBJECT
         if (type == "Q_JOIN_OK") { return JsonUtility.FromJson<Q_JOIN_OK>(json); }
         if (type == "Q_IM_ALIVE") { return JsonUtility.FromJson<Q_IM_ALIVE>(json); }
         if (type == "Q_IM_ALIVE_RESPONSE") { return JsonUtility.FromJson<Q_IM_ALIVE_RESPONSE>(json); }
-
+        if (type == "Q_CUBE_POSITION") { return JsonUtility.FromJson<Q_CUBE_POSITION>(json); }
+        
         //na wypadek błędu
         Debug.Log("Q_OBJECT ERROR, Nieznany typ "+type.ToString());
         Debug.Log("Zapomniałeś dopisać tą linię kodu w Q_OBJECT");
@@ -53,7 +54,7 @@ public class Q_SERVER_INFO : Q_OBJECT   //obiekt zawierający dane o serwerze
     public override void executeQuery(QueuePack queuePack)
     {
         Debug.Log("Q_SERVER_INFO: "+ serverName+"\t"+ numberOfPlayers);
-        GameObject gameObject = GameObject.Find("GameObject");
+        GameObject gameObject = GameObject.Find("Network");
         Test test = gameObject.GetComponent<Test>();
         if (test != null)
             test.ip = queuePack.endpoint;
@@ -128,5 +129,25 @@ public class Q_IM_ALIVE_RESPONSE : Q_OBJECT   //obiekt oznaczający że komputer
     {
         Debug.Log("Q_IM_ALIVE_RESPONSE done.");
         NetworkManager.instance.setServerTimeZero();
+    }
+}
+[Serializable]
+public class Q_CUBE_POSITION : Q_OBJECT   //obiekt oznaczający że komputer nie umarł
+{
+    public Vector3 position;
+    public Quaternion rotation;
+    public int type;
+
+    public override void executeQuery(QueuePack queuePack)
+    {
+        if (type == 0)
+        {
+            Test.instance.cubeServer.transform.position = position;
+            Test.instance.cubeServer.transform.rotation = rotation;
+        } else
+        {
+            Test.instance.cubeClient.transform.position = position;
+            Test.instance.cubeClient.transform.rotation = rotation;
+        }
     }
 }
